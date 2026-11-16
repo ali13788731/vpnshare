@@ -24,6 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ir.mrpc.hotshare.Actions
 import ir.mrpc.hotshare.core.Net
 import ir.mrpc.hotshare.core.Pairing
 import ir.mrpc.hotshare.core.Prefs
