@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.sp
 import ir.mrpc.hotshare.client.ClientError
 import ir.mrpc.hotshare.client.ClientState
 import ir.mrpc.hotshare.client.ClientVpnService
+import ir.mrpc.hotshare.Actions
 import ir.mrpc.hotshare.core.Net
 import ir.mrpc.hotshare.core.Pairing
 import ir.mrpc.hotshare.core.Strings
