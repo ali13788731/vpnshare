@@ -1,0 +1,89 @@
+name: Build HotShare APK
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract uploaded project ZIP into repository root
+        shell: bash
+        run: |
+          set -euo pipefail
+          ZIP_FILE="vpnshare-v2.2.zip"
+          if [[ -f "$ZIP_FILE" ]]; then
+            TMP_DIR="$(mktemp -d)"
+            unzip -q "$ZIP_FILE" -d "$TMP_DIR"
+            SETTINGS_FILE="$(find "$TMP_DIR" -type f \( -name settings.gradle -o -name settings.gradle.kts \) -print -quit)"
+            if [[ -z "$SETTINGS_FILE" ]]; then
+              echo "Could not find settings.gradle or settings.gradle.kts in the uploaded ZIP."
+              echo "Archive contents:"
+              find "$TMP_DIR" -maxdepth 4 -type f | head -200
+              exit 1
+            fi
+            PROJECT_DIR="$(dirname "$SETTINGS_FILE")"
+            shopt -s dotglob nullglob
+            for ITEM in "$PROJECT_DIR"/*; do
+              [[ "$(basename "$ITEM")" == ".github" ]] && continue
+              cp -a "$ITEM" .
+            done
+            rm -rf "$TMP_DIR" "$ZIP_FILE"
+            echo "Project extracted into repository root."
+          else
+            echo "No project ZIP found; proceeding with existing repository files."
+          fi
+
+      - name: Commit extracted project and remove ZIP
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if ! git diff --cached --quiet; then
+            git commit -m "Extract vpnshare v2.2 project"
+            git push
+          else
+            echo "No repository changes to commit."
+          fi
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Build release APK
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -f ./gradlew ]]; then
+            chmod +x ./gradlew
+            ./gradlew assembleRelease --no-daemon
+          else
+            echo "Gradle wrapper (gradlew) was not found in the project root."
+            exit 1
+          fi
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: HotShare-apk
+          path: |
+            **/build/outputs/apk/release/*.apk
+          if-no-files-found: error
+          retention-days: 14
