@@ -28,7 +28,6 @@ jobs:
             SETTINGS_FILE="$(find "$TMP_DIR" -type f \( -name settings.gradle -o -name settings.gradle.kts \) -print -quit)"
             if [[ -z "$SETTINGS_FILE" ]]; then
               echo "Could not find settings.gradle or settings.gradle.kts in the uploaded ZIP."
-              echo "Archive contents:"
               find "$TMP_DIR" -maxdepth 4 -type f | head -200
               exit 1
             fi
@@ -64,20 +63,24 @@ jobs:
           distribution: temurin
           java-version: "17"
 
-      - name: Set up Gradle
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android NDK
+        run: sdkmanager "ndk;27.2.12479018"
+
+      - name: Download native tunnel engine
+        run: |
+          chmod +x ./setup_native.sh
+          ./setup_native.sh
+
+      - name: Set up Gradle 8.9
         uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.9"
 
       - name: Build release APK
-        shell: bash
-        run: |
-          set -euo pipefail
-          if [[ -f ./gradlew ]]; then
-            chmod +x ./gradlew
-            ./gradlew assembleRelease --no-daemon
-          else
-            echo "Gradle wrapper (gradlew) was not found in the project root."
-            exit 1
-          fi
+        run: gradle assembleRelease --no-daemon
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
