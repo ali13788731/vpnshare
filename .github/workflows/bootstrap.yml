@@ -33,7 +33,7 @@ jobs:
           else
             SOURCE="$RUNNER_TEMP/project"
           fi
-          rsync -a --delete --exclude='.git/' --exclude='.github/workflows/bootstrap.yml' "$SOURCE/" ./
+          rsync -a --delete --exclude='.git/' --exclude='.github/workflows/bootstrap.yml' --exclude='.github/workflows/build.yml' "$SOURCE/" ./
           rm -f vpnshare-fixed.zip
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
