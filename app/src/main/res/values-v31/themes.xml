@@ -1,0 +1,10 @@
+<resources>
+    <style name="Theme.HotShare" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">#070B1A</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <!-- one splash only: hide the system logo splash, keep the animated in-app one -->
+        <item name="android:windowSplashScreenBackground">#070B1A</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/splash_empty</item>
+    </style>
+</resources>
